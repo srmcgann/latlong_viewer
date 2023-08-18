@@ -12,7 +12,7 @@
       canvas{
         border: 2px solid #486;
         position: absolute;
-        top: 50%;
+        top: calc(50% + 100px);
         left: 50%;
         background-color: #222;
         background-position: center center;
@@ -34,6 +34,22 @@
       .newDiv{
         text-align: center;
       }
+      #goButton{
+        border: none;
+        background: #0fc4;
+        color: #fff;
+        cursor: pointer;
+        position: fixed;
+        top: 0;
+        right: 20px;
+        margin: 20px;
+        font-size: 24px;
+        border-radius: 10px;
+        min-width: 100px;
+        line-height: 0;
+        padding: 0;
+        height: 40px;
+      }
       .imgThumb{
         width: calc(100% - 50px);
         margin:25px;
@@ -45,18 +61,34 @@
         transform: translate(-50%,-50%);
         font-size: 24px;
       }
+      #codeArea{
+        width: calc(100vw - 65px);
+        border: 1px solid #4f88;
+        position: absolute;
+        left: 50%;
+        margin-top: 10px;
+        height: 80px;
+        transform: translate(-50%);
+        background: #002;
+        color: #0f8;
+      }
+      #codeArea:focus{
+        outline: none;
+      }
     </style>
     <script>
-      url = location.href.indexOf('src=') !== -1 ? location.href.split('src=')[1].split('&')[0] : ''
+      url = location.href.indexOf('src=') != -1 ? location.href.split('src=')[1].split('&')[0] : ''
     </script>
   </head>
   <body>
-    <button onclick="Draw()" id="button">Draw</button>
+    <button onclick="Draw_()" id="button">Draw</button>
     <div style="font-family: courier;position:absolute; z-index:-100">a</div>
+    <textarea placeholder="code" spellcheck="false" id="codeArea"></textarea>
     <canvas id="c"></canvas>
+    <button id="goButton" onclick="launch_(false)">go</button>
   </body>
   <script>
-
+  
     asset = ''
     document.fonts.onloadingdone=()=>{console.log('fonts loaded')}
     duration = window.location.href.toUpperCase().split('DURATION=')[1]
@@ -84,6 +116,7 @@
     export_base = true
     fftSize = 128
     visualization = 13
+    autoStart = 1
 
     recordingStarted=playing=vidplaying=analyzerSetup=0
     canvas2 = document.querySelector("#c")
@@ -133,6 +166,18 @@
     }
     rsz()
 
+    async function init(){
+      if(window.location.href.indexOf('usecode=')!=-1){
+        animationStyle=2
+        url=window.location.href.split('usecode=')[1].split('&')[0]
+        await fetch(url).then(res=>res.text()).then(data => {
+          chosenDemo = data
+          launch_(true)
+        })
+      }
+    }
+    init()
+    
     async function Draw(){
 
       if(!t){
@@ -196,7 +241,7 @@
         R=(Rl,Pt,Yw,m)=>{X=S(p=(A=(M=Math).atan2)(X,Y)+Rl)*(d=(H=M.hypot)(X,Y)),Y=C(p)*d,Y=S(p=A(Y,Z)+Pt)*(d=H(Y,Z)),Z=C(p)*d,X=S(p=A(X,Z)+Yw)*(d=H(X,Z)),Z=C(p)*d;if(m)X+=oX,Y+=oY,Z+=oZ}
         Q=()=>[c.width/2+X/Z*900,c.height/2+Y/Z*900]
         for(CB=[],j=6;j--;)for(i=4;i--;)CB=[...CB,[(a=[S(p=Math.PI*2/4*i+Math.PI/4),C(p),2**.5/2])[j%3]*(l=j<3?-1:1),a[(j+1)%3]*l,a[(j+2)%3]*l]]
-        s = location.href.indexOf('src=') !== -1 ? window.location.href.split('src=')[1].split('?')[0] : ''
+        s = window.location.href.indexOf('src=')!=-1 ? window.location.href.split('src=')[1].split('?')[0] : ''
         if(typeof s !== 'undefined' && s.length){
           s=s.split('&')[0]
           asset=s
@@ -217,17 +262,16 @@
         go___=false
         jpg[jpgIsVid?'oncanplaythrough':'onload']=e=>{
 					if(jpgIsVid){
-            jpg.defaultPlaybackRate = playbackSpeed
-	    console.log('setting playbackspeed to :' + jpg.defaultPlaybackRate)
-            //jpg.play()
-					}
+            jpg.defaultPlaybackRate = jpg.playbackRate = playbackSpeed
+            jpg.play()
+	}
           //setTimeout(()=>{
           buffer___ = document.createElement('canvas')
-          buffer___.width=1920
-          buffer___.height=1080
+          buffer___.width=c.width
+          buffer___.height=c.height
           bctx = buffer___.getContext('2d', {willReadFrequently: true})
           if(jpgIsVid){
-	    setTimeout(()=>{jpg.play()},)
+	    setTimeout(()=>{jpg.play()},50)
             vid=asset
             if(vid.videoWidth/vid.videoHeight>1.7777777778){
               w=c.width
@@ -246,8 +290,8 @@
             }
 					}
 					getMask=()=>{
-            bctx.clearRect(0,0,1920,1080)
-            bctx.drawImage(jpg,960-w/2,540-h/2,w,h)
+            bctx.clearRect(0,0,c.width,c.height)
+            bctx.drawImage(jpg,c.width/2-w/2,c.height/2-h/2,w,h)
             data = bctx.getImageData(0,0,buffer___.width,buffer___.height)
             l=data.data
             for(i=0;i<l.length;i+=4){
@@ -295,19 +339,12 @@
         } else {
           tgt_col='#eab29c'
         }
-        animationStyle=window.location.href.toUpperCase().split('ANIMATIONSTYLE=')[1]
+        /*animationStyle=window.location.href.toUpperCase().split('ANIMATIONSTYLE=')[1]
         if(typeof animationStyle !== 'undefined' && animationStyle.length){
           animationStyle=+animationStyle.split('&')[0]
         } else {
           animationStyle=0
-        }
-        if(window.location.href.indexOf('usecode=')!=-1){
-          animationStyle=2
-          url=window.location.href.split('usecode=')[1].split('&')[0]
-          await fetch(url).then(res=>res.text()).then(data => {
-            chosenDemo = data
-          })
-        }
+        }*/
         tgtRGBA=hexToRGBA(tgt_col)
 				jpg.src=asset
       }
@@ -621,12 +658,7 @@
             goCustom = false
             if(typeof chosenDemo !== 'undefined'){
               customJS = chosenDemo//.demoJS.split('Draw=()=>{')
-              //if(customJS.length){
-              //  customJS = customJS[1].split('}')
-              //  customJS.pop()
-              //  customJS = customJS.join('}').split('t+=1/60')[0]
-                goCustom = true
-              //}
+              goCustom = true
             }
             let src = `function bypass_eval(){` + customJS + `}`
             let script = document.createElement('script')
@@ -649,7 +681,7 @@
         x.fillRect(0,0,c.width,c.height)
       }
 
-	if(jpgIsVid) jpg.defaultPlaybackRate = playbackSpeed
+	if(jpgIsVid) jpg.defaultPlaybackRate = jpg.playbackRate = playbackSpeed
 
 
         t+=1/60
@@ -1650,17 +1682,17 @@
               x.globalAlpha = 1
               s=8-S(t/2)*7
               for(i=0;i<25;++i){
-                X=960+((i%5)-2)*384*s-192*s
-                Y=540+((i/5|0)-2)*216*s-108*s
+                X=c.width/2+((i%5)-2)*384*s-192*s
+                Y=c.height/2+((i/5|0)-2)*216*s-108*s
                 x.drawImage(bgvid,X,Y,384*s,216*s+5);
               }
               x.globalCompositeOperation='color-dodge'
               x.fillStyle=`#34f`
               x.fillRect(0,0,c.width,c.height)
               x.globalCompositeOperation='source-over'
-              X=S(p=t*10)*(d=Math.hypot(960,540))
-              Y=C(p)*(d=Math.hypot(960,540))
-              g=x.createLinearGradient(960+X,540+Y,960-X,540-Y)
+              X=S(p=t*10)*(d=Math.hypot(c.width/2,c.height/2))
+              Y=C(p)*(d=Math.hypot(c.width/2,c.height/2))
+              g=x.createLinearGradient(c.width/2+X,c.height/2+Y,c.width/2-X,c.height/2-Y)
               g.addColorStop(0, `hsla(${t*300+0},99%,${50-S(t*3)*50}%,.4)`)
               g.addColorStop(1, `hsla(${t*300+180},99%,${50-S(t*6)*50}%,.4)`)
               x.fillStyle = g
@@ -1815,7 +1847,6 @@
 
 
     startRecording = () => {
-      return
       console.log('recording started')
       recordingStarted=1
       const chunks = []
@@ -1853,11 +1884,23 @@
       document.body.appendChild(a)
     }
   
-    if(stage2) Draw()
-    if(!stage2){
+    launch_ = (mode=false) => {
+      if(!mode){
+        chosenDemo = document.querySelector('#codeArea').value
+        console.log(chosenDemo)
+        goCustom =  true
+      } else {
+        document.querySelector('#codeArea').value = chosenDemo
+      }
+      animationStyle = 2
       Draw()
       if(export_base) setTimeout(()=>startRecording(), initialDelay)
     }
+
+    //if(stage2) Draw()
+    //if(!stage2){
+    //  launch_()
+    //}
 
   </script>
 </html>
