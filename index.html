@@ -78,6 +78,7 @@
     </style>
     <script>
       url = location.href.indexOf('src=') != -1 ? location.href.split('src=')[1].split('&')[0] : ''
+      go__ = !url
     </script>
   </head>
   <body>
@@ -259,7 +260,6 @@
 					jpgIsVid=false
 					jpg=new Image()
 				}
-        go___=false
         jpg[jpgIsVid?'oncanplaythrough':'onload']=e=>{
 					if(jpgIsVid){
             jpg.defaultPlaybackRate = jpg.playbackRate = playbackSpeed
