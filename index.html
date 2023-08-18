@@ -91,6 +91,7 @@
   <script>
   
     asset = ''
+    buffer___ = ''
     document.fonts.onloadingdone=()=>{console.log('fonts loaded')}
     duration = window.location.href.toUpperCase().split('DURATION=')[1]
     if(typeof duration !== 'undefined' && duration.length){
@@ -290,6 +291,7 @@
             }
 					}
 					getMask=()=>{
+            if(!buffer___) return
             bctx.clearRect(0,0,c.width,c.height)
             bctx.drawImage(jpg,c.width/2-w/2,c.height/2-h/2,w,h)
             data = bctx.getImageData(0,0,buffer___.width,buffer___.height)
@@ -498,7 +500,7 @@
               })
             })
             x.globalAlpha=1
-            if(go___) x.drawImage(buffer___,0,0,c.width,c.height)      
+            if(go___ && buffer___) x.drawImage(buffer___,0,0,c.width,c.height)      
           }
         break
         case 1:
@@ -671,7 +673,7 @@
           }
         break
       }
-      if(go___){
+      if(go___ && buffer___){
 				if(jpgIsVid)getMask()
         x.globalAlpha=1
         x.drawImage(buffer___,0,0,c.width,c.height)
