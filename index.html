@@ -47,7 +47,7 @@
       }
     </style>
     <script>
-      url = location.href.split('src=')[1].split('&')[0]
+      url = location.href.indexOf('src=') !== -1 ? location.href.split('src=')[1].split('&')[0] : ''
     </script>
   </head>
   <body>
